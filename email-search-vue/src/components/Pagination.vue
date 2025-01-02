@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center">
+  <div v-if="totalEmails > 0" class="flex flex-col items-center">
     <!-- Texto de ayuda -->
     <span class="text-sm text-gray-700 dark:text-gray-400">
       Showing 

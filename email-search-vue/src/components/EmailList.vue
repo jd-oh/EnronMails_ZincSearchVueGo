@@ -1,6 +1,9 @@
 <template>
   <div class="relative overflow-x-auto">
-    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+    <table 
+      v-if="emails.length > 0" 
+      class="w-full text-sm text-left text-gray-500 dark:text-gray-400"
+    >
       <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
         <tr>
           <th class="px-6 py-3">Subject</th>
@@ -26,11 +29,23 @@
         </tr>
       </tbody>
     </table>
+    <p v-else class="text-center text-gray-500 mt-4">No results found. Please search for emails.</p>
   </div>
 </template>
 
+
 <script setup>
-defineProps(['emails', 'selectedEmail']);
+defineProps({
+  emails: {
+    type: Array,
+    default: () => [], // Valor predeterminado vacío para evitar errores
+  },
+  selectedEmail: {
+    type: Object,
+    default: () => null,
+  },
+});
+
 defineEmits(['select']);
 </script>
 

@@ -51,6 +51,7 @@ const totalEmails = ref(0);
 const totalPages = ref(1);
 const isModalVisible = ref(false); 
 
+
 const fetchEmails = async () => {
   try {
     const response = await axios.post(
@@ -64,6 +65,7 @@ const fetchEmails = async () => {
 
     emails.value = response.data.hits.hits.map(hit => hit._source);
     totalEmails.value = response.data.hits.total ? response.data.hits.total.value : 0;
+    console.log(totalEmails.value)
     totalPages.value = Math.ceil(totalEmails.value / pageSize);
   } catch (error) {
     console.error('Error fetching emails:', error);
