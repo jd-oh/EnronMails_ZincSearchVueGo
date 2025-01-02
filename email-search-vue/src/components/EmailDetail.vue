@@ -49,6 +49,3 @@ const closeModal = () => {
 };
 </script>
 
-<style scoped>
-/* Aquí puedes incluir estilos específicos para el modal */
-</style>

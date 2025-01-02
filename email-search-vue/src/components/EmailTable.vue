@@ -1,62 +1,30 @@
 <template>
-  <div class="flex w-full h-screen">
-    <!-- Panel izquierdo -->
-    <div class="w-full p-8 overflow-y-auto">
-      <SearchBar 
-        v-model="searchQuery" 
-        @search="fetchEmails" 
-        class="mb-6"
-      />
+  <div class="fixed inset-0 w-full h-screen p-8 overflow-y-auto bg-gray-100">
+  <h1 class="mb-4 text-3xl font-extrabold text-gray-900 dark:text-white md:text-5xl lg:text-6xl"><span class="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">Enron Mails</span> List</h1>
+   <!-- Barra de búsqueda -->
+    <SearchBar 
+      v-model="searchQuery" 
+      @search="fetchEmails" 
+      class="mb-6"
+    />
 
-      <!-- Tabla -->
-      <table class="min-w-full table-auto border-collapse">
-        <thead>
-          <tr>
-            <th class="px-4 py-2 border-b text-left bg-gray-100">Message ID</th>
-            <th class="px-4 py-2 border-b text-left bg-gray-100">Subject</th>
-            <th class="px-4 py-2 border-b text-left bg-gray-100">From</th>
-            <th class="px-4 py-2 border-b text-left bg-gray-100">To</th>
-            <th class="px-4 py-2 border-b text-left bg-gray-100">Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr 
-            v-for="email in emails" 
-            :key="email._id" 
-            @click="selectEmail(email)"
-            :class="{ 'bg-blue-100': selectedEmail && selectedEmail._id === email._id, 'hover:bg-gray-200 cursor-pointer': true }"
-          >
-            <td class="px-4 py-2 border-b">{{ email.message_id }}</td>
-            <td class="px-4 py-2 border-b">{{ email.subject }}</td>
-            <td class="px-4 py-2 border-b">{{ email.from }}</td>
-            <td class="px-4 py-2 border-b">{{ email.to }}</td>
-            <td class="px-4 py-2 border-b">{{ email.date }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Lista de correos -->
+    <EmailList 
+      :emails="emails" 
+      :selectedEmail="selectedEmail"
+      @select="selectEmail"
+    />
 
-      <!-- Paginación -->
-      <div class="flex justify-center items-center mt-4 space-x-4">
-        <button 
-          @click="prevPage" 
-          :disabled="page <= 0"
-          class="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-        >
-          Anterior
-        </button>
-
-        <span class="text-lg">Página {{ page + 1 }} de {{ totalPages }}</span>
-
-        <button 
-          @click="nextPage" 
-          :disabled="(page.value + 1) * pageSize >= totalEmails"
-          class="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-        >
-          Siguiente
-        </button>
-      </div>
-    </div>
-
+    <!-- Paginación -->
+    <Pagination 
+      :page="page" 
+      :totalPages="totalPages" 
+      :totalEmails="totalEmails"
+      :pageSize="pageSize"
+      @prev="prevPage"
+      @next="nextPage"
+    />
+    
     <!-- Modal de detalles de email -->
     <EmailDetail 
       :email="selectedEmail"
@@ -70,23 +38,25 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import SearchBar from './SearchBar.vue';
-import EmailDetail from './EmailDetail.vue'; // Importar el componente de detalle de correo
+import EmailList from './EmailList.vue';  
+import EmailDetail from './EmailDetail.vue'; 
+import Pagination from './Pagination.vue'; 
 
 const emails = ref([]);
 const selectedEmail = ref(null);
 const searchQuery = ref('');
 const page = ref(0);  
-const pageSize = 10;  
+const pageSize = 5;  
 const totalEmails = ref(0);
 const totalPages = ref(1);
-const isModalVisible = ref(false); // Estado para mostrar el modal
+const isModalVisible = ref(false); 
 
 const fetchEmails = async () => {
   try {
     const response = await axios.post(
       'http://localhost:8080/api/search',
       {
-        term: searchQuery.value || "*", // Si no hay búsqueda, buscamos todos
+        term: searchQuery.value || "*", 
         from: page.value * pageSize,
         size: pageSize
       }
@@ -102,11 +72,11 @@ const fetchEmails = async () => {
 
 const selectEmail = (email) => {
   selectedEmail.value = email;
-  isModalVisible.value = true; // Mostrar el modal cuando se seleccione un correo
+  isModalVisible.value = true; 
 };
 
 const closeModal = () => {
-  isModalVisible.value = false; // Cerrar el modal
+  isModalVisible.value = false; 
 };
 
 const prevPage = () => {
@@ -125,7 +95,3 @@ const nextPage = () => {
 
 onMounted(() => fetchEmails());
 </script>
-
-<style scoped>
-/* Estilos adicionales si es necesario */
-</style>
