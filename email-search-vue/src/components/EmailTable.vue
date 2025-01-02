@@ -1,13 +1,11 @@
 <template>
   <div class="container">
     <div class="left-panel">
-      <input 
+      <SearchBar 
         v-model="searchQuery" 
-        placeholder="Buscar por subject, from o to" 
-        class="search-box"
-        @input="fetchEmails(0)"
+        @search="fetchEmails" 
       />
-      
+
       <table>
         <thead>
           <tr>
@@ -74,6 +72,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import SearchBar from './SearchBar.vue';
 
 const emails = ref([]);
 const selectedEmail = ref(null);
@@ -83,13 +82,13 @@ const pageSize = 10;
 const totalEmails = ref(0);
 const totalPages = ref(1);
 
-const fetchEmails = async (pageNumber = 0) => {
+const fetchEmails = async () => {
   try {
     const response = await axios.post(
       'http://localhost:8080/api/search',
       {
-        term: searchQuery.value || "*",
-        from: pageNumber * pageSize,
+        term: searchQuery.value || "*", // Si no hay búsqueda, buscamos todos
+        from: page.value * pageSize,
         size: pageSize
       }
     );
@@ -102,8 +101,6 @@ const fetchEmails = async (pageNumber = 0) => {
   }
 };
 
-
-
 const selectEmail = (email) => {
   selectedEmail.value = email;
 };
@@ -115,104 +112,20 @@ const closeEmail = () => {
 const prevPage = () => {
   if (page.value > 0) {
     page.value--;
-    fetchEmails(page.value);
+    fetchEmails();
   }
 };
 
 const nextPage = () => {
   if ((page.value + 1) * pageSize < totalEmails.value) {
     page.value++;
-    fetchEmails(page.value);
+    fetchEmails();
   }
 };
 
-onMounted(() => fetchEmails(0));
+onMounted(() => fetchEmails());
 </script>
 
 <style scoped>
-.container {
-  display: flex;
-  height: 100vh;
-}
-.left-panel {
-  width: 60%;
-  padding: 20px;
-}
-.right-panel {
-  width: 40%;
-  padding: 20px;
-  border-left: 1px solid #ddd;
-  overflow-y: auto;
-}
-.search-box {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 20px;
-  font-size: 1em;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th, td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: left;
-}
-th {
-  background-color: #f4f4f4;
-}
-tr {
-  cursor: pointer;
-}
-tr:hover {
-  background-color: #f0f0f0;
-}
-.selected {
-  background-color: #d1e7ff;
-}
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-button {
-  margin: 0 10px;
-  padding: 10px 20px;
-  cursor: pointer;
-}
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-.email-body {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  position: relative;
-}
-.body-text {
-  white-space: pre-wrap;
-  font-family: monospace;
-}
-.empty-state {
-  text-align: center;
-  margin-top: 50px;
-  color: #888;
-}
-.close-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #999;
-}
-.close-button:hover {
-  color: #333;
-}
+/* Estilos ya definidos */
 </style>
