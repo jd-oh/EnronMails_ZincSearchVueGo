@@ -4,6 +4,8 @@
    <!-- Barra de búsqueda -->
     <SearchBar 
       v-model="searchQuery" 
+      :field="selectedField"
+      @update:field="field => selectedField = field"
       @search="fetchEmails" 
       class="mb-6"
     />
@@ -45,12 +47,12 @@ import Pagination from './Pagination.vue';
 const emails = ref([]);
 const selectedEmail = ref(null);
 const searchQuery = ref('');
+const selectedField = ref('body'); // Campo de búsqueda seleccionado
 const page = ref(0);  
 const pageSize = 5;  
 const totalEmails = ref(0);
 const totalPages = ref(1);
 const isModalVisible = ref(false); 
-
 
 const fetchEmails = async () => {
   try {
@@ -58,15 +60,20 @@ const fetchEmails = async () => {
       'http://localhost:8080/api/search',
       {
         term: searchQuery.value || "*", 
+        field: selectedField.value, // Enviar el campo al backend
         from: page.value * pageSize,
-        size: pageSize
+        size: pageSize,
       }
     );
 
     emails.value = response.data.hits.hits.map(hit => hit._source);
     totalEmails.value = response.data.hits.total ? response.data.hits.total.value : 0;
-    console.log(totalEmails.value)
     totalPages.value = Math.ceil(totalEmails.value / pageSize);
+
+    if (emails.value.length === 0 && page.value !== 0) {
+      page.value = 0;
+      fetchEmails();
+    }
   } catch (error) {
     console.error('Error fetching emails:', error);
   }
@@ -96,4 +103,4 @@ const nextPage = () => {
 };
 
 onMounted(() => fetchEmails());
-</script>
+</script> 

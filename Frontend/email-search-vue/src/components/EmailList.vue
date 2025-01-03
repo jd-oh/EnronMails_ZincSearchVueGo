@@ -8,6 +8,7 @@
         <tr>
           <th class="px-6 py-3">Subject</th>
           <th class="px-6 py-3">From</th>
+          <!-- <th class="px-6 py-3">Message Id</th> -->
           <th class="px-6 py-3">To</th>
           <th class="px-6 py-3">Date</th>
         </tr>
@@ -24,6 +25,7 @@
         >
           <td class="px-6 py-4 h-16 font-medium text-gray-900 whitespace-nowrap dark:text-white truncate">{{ email.subject }}</td>
           <td class="px-6 py-4 h-16 truncate">{{ email.from }}</td>
+          <!-- <td class="px-6 py-4 h-16 truncate">{{ email.message_id}}</td> -->
           <td class="px-6 py-4 h-16 truncate">{{ email.to }}</td>
           <td class="px-6 py-4 h-16 truncate">{{ email.date }}</td>
         </tr>

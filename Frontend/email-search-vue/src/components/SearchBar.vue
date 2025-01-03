@@ -1,38 +1,59 @@
 <template>
-  <input 
-    v-model="modelValue" 
-    placeholder="Buscar por subject, from o to" 
-    class="search-box"
-    @input="handleInput" 
-  />
+  <div class="search-container">
+    <select v-model="selectedField" class="field-selector" @change="emitSearch">
+      <option value="body">Body</option>
+      <option value="from">From</option>
+      <option value="to">To</option>
+      <option value="subject">Subject</option>
+    </select>
+    <input 
+      v-model="modelValue" 
+      placeholder="Search..." 
+      class="search-box"
+      @input="handleInput" 
+    />
+  </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 
-const modelValue = ref(''); // Almacena el valor del campo de búsqueda
-const emit = defineEmits(['update:modelValue', 'search']); // Emite los eventos necesarios
+const modelValue = ref('');
+const selectedField = ref('body'); // Campo predeterminado para buscar
+const emit = defineEmits(['update:modelValue', 'update:field', 'search']);
 
-let timeoutId = null; // Para almacenar el ID del timeout
+let timeoutId = null;
 
 const handleInput = (event) => {
-  // Emite el cambio de valor para sincronizar el campo de búsqueda
   emit('update:modelValue', event.target.value);
-
-  // Limpiar cualquier timeout previo
   clearTimeout(timeoutId);
-
-  // Crear un nuevo timeout para que la búsqueda ocurra después de un pequeño retraso
   timeoutId = setTimeout(() => {
-    emit('search'); // Emitimos el evento de búsqueda
-  }, 500); // 500 ms de retraso
+    emitSearch();
+  }, 500);
+};
+
+const emitSearch = () => {
+  emit('update:field', selectedField.value); // Emite el campo seleccionado
+  emit('search');
 };
 </script>
 
 <style scoped>
-.search-box {
-  width: 100%;
+.search-container {
+  display: flex;
+  gap: 10px;
+}
+
+.field-selector {
   padding: 10px;
-  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.search-box {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 </style>
