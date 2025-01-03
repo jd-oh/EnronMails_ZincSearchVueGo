@@ -13,6 +13,7 @@ type SearchRequest struct {
     Term  string `json:"term"`
     From  int    `json:"from"`
     Size  int    `json:"size"`
+    Field string `json:"field"`  
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
@@ -23,18 +24,24 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    // Si no se envía un campo, usar 'body' como predeterminado
+    field := reqBody.Field
+    if field == "" {
+        field = "body"
+    }
+
     query := fmt.Sprintf(`{
         "search_type": "match",
         "query": {
             "term": "%s",
-            "field": "body",
+            "field": "%s",
             "start_time": "2021-12-25T15:08:48.777Z",
             "end_time": "2025-12-27T15:08:48.777Z"
         },
         "from": %d,
         "max_results": %d,
         "_source": ["subject", "from", "to", "date", "body", "message_id"]
-    }`, reqBody.Term, reqBody.From, reqBody.Size)
+    }`, reqBody.Term, field, reqBody.From, reqBody.Size)
 
     req, err := http.NewRequest("POST", "http://localhost:4080/api/emails/_search", strings.NewReader(query))
     if err != nil {
@@ -57,6 +64,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
     w.Write(body)
 }
+
 
 // Middleware para habilitar CORS
 func enableCors(next http.Handler) http.Handler {
