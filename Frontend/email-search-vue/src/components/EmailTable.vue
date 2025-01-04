@@ -38,7 +38,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import emailService from '../services/emailService';
 import SearchBar from './SearchBar.vue';
 import EmailList from './EmailList.vue';  
 import EmailDetail from './EmailDetail.vue'; 
@@ -47,27 +47,24 @@ import Pagination from './Pagination.vue';
 const emails = ref([]);
 const selectedEmail = ref(null);
 const searchQuery = ref('');
-const selectedField = ref('body'); // Campo de búsqueda seleccionado
+const selectedField = ref('body');
 const page = ref(0);  
 const pageSize = 5;  
 const totalEmails = ref(0);
 const totalPages = ref(1);
-const isModalVisible = ref(false); 
+const isModalVisible = ref(false);
 
 const fetchEmails = async () => {
   try {
-    const response = await axios.post(
-      'http://localhost:8080/api/search',
-      {
-        term: searchQuery.value || "*", 
-        field: selectedField.value, // Enviar el campo al backend
-        from: page.value * pageSize,
-        size: pageSize,
-      }
-    );
+    const data = await emailService.fetchEmails({
+      term: searchQuery.value,
+      field: selectedField.value,
+      from: page.value * pageSize,
+      size: pageSize,
+    });
 
-    emails.value = response.data.hits.hits.map(hit => hit._source);
-    totalEmails.value = response.data.hits.total ? response.data.hits.total.value : 0;
+    emails.value = data.hits.hits.map(hit => hit._source);
+    totalEmails.value = data.hits.total ? data.hits.total.value : 0;
     totalPages.value = Math.ceil(totalEmails.value / pageSize);
 
     if (emails.value.length === 0 && page.value !== 0) {
@@ -81,11 +78,11 @@ const fetchEmails = async () => {
 
 const selectEmail = (email) => {
   selectedEmail.value = email;
-  isModalVisible.value = true; 
+  isModalVisible.value = true;
 };
 
 const closeModal = () => {
-  isModalVisible.value = false; 
+  isModalVisible.value = false;
 };
 
 const prevPage = () => {
@@ -103,4 +100,4 @@ const nextPage = () => {
 };
 
 onMounted(() => fetchEmails());
-</script> 
+</script>
