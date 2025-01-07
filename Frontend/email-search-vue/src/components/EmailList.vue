@@ -11,6 +11,7 @@
           <!-- <th class="px-6 py-3">Message Id</th> -->
           <th class="px-6 py-3">To</th>
           <th class="px-6 py-3">Date</th>
+          <th class="px-6 py-3">Folder</th>
         </tr>
       </thead>
       <tbody>
@@ -28,13 +29,13 @@
           <!-- <td class="px-6 py-4 h-16 truncate">{{ email.message_id}}</td> -->
           <td class="px-6 py-4 h-16 truncate">{{ email.to }}</td>
           <td class="px-6 py-4 h-16 truncate">{{ email.date }}</td>
+          <td class="px-6 py-4 h-16 truncate">{{ email.folder }}</td>
         </tr>
       </tbody>
     </table>
     <p v-else class="text-center text-gray-500 mt-4">No results found. Please search for emails.</p>
   </div>
 </template>
-
 
 <script setup>
 defineProps({
