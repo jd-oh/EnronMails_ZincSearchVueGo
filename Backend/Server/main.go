@@ -40,7 +40,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
         },
         "from": %d,
         "max_results": %d,
-        "_source": ["subject", "from", "to", "date", "body", "message_id"]
+        "_source": ["subject", "from", "to", "date", "body", "message_id", "folder"]
     }`, reqBody.Term, field, reqBody.From, reqBody.Size)
 
     req, err := http.NewRequest("POST", "http://localhost:4080/api/emails/_search", strings.NewReader(query))
