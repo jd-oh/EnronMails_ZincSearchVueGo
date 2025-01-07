@@ -28,29 +28,27 @@ type Email struct {
 
 func main() {
 	// Configurar el archivo de log
-	logFile, err := os.OpenFile("process.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	logFile, err := os.OpenFile("process5.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Printf("Error creando archivo de log: %v\n", err)
 		return
 	}
 	defer logFile.Close()
 
-	// Configurar logger
 	log.SetOutput(logFile)
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
 	log.Println("Iniciando procesamiento")
 
-	// Iniciar perfilado de CPU y guardar en archivo
-	f, err := os.Create("cpu_profile3.prof")
+	// Iniciar perfilado de CPU
+	f, err := os.Create("cpu_profile5.prof")
 	if err != nil {
-		fmt.Println("Error creating profile file:", err)
-		return
+		log.Fatalf("Error creando archivo de perfil: %v", err)
 	}
 	defer f.Close()
 
-	pprof.StartCPUProfile(f)         // Inicia el perfilado de CPU
-	defer pprof.StopCPUProfile()     // Asegura que el perfilado se detenga al finalizar
+	pprof.StartCPUProfile(f)
+	defer pprof.StopCPUProfile()
 
 	// Configuración
 	folderPath := "enron_mail_20110402"
@@ -59,7 +57,10 @@ func main() {
 	start := time.Now()
 	log.Printf("Procesando carpeta: %s\n", folderPath)
 
-	err = processFolderConcurrent(folderPath, indexName, 8) // 8 workers
+	// Aumentar el número de workers para maximizar el uso de CPU
+	numWorkers := 16 // Puedes ajustar este valor para probar diferentes configuraciones
+
+	err = processFolderConcurrent(folderPath, indexName, numWorkers)
 	if err != nil {
 		log.Printf("Error procesando carpeta: %v\n", err)
 	}
@@ -69,7 +70,7 @@ func main() {
 }
 
 func processFolderConcurrent(folderPath, indexName string, numWorkers int) error {
-	files := make(chan string, 100) // Buffer para evitar bloqueos
+	files := make(chan string, 10000) // Buffer grande para evitar bloqueos
 	wg := &sync.WaitGroup{}
 
 	// Iniciar workers
@@ -81,7 +82,8 @@ func processFolderConcurrent(folderPath, indexName string, numWorkers int) error
 	// Agregar archivos al canal
 	err := filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			return fmt.Errorf("error accediendo a %s: %w", path, err)
+			log.Printf("Error accediendo a %s: %v", path, err)
+			return nil // Continuar procesando
 		}
 		if !info.IsDir() {
 			files <- path
@@ -89,16 +91,17 @@ func processFolderConcurrent(folderPath, indexName string, numWorkers int) error
 		return nil
 	})
 
-	close(files) // Cerrar canal para que los workers terminen
-	wg.Wait()    // Esperar a que todos los workers terminen
+	close(files)
+	wg.Wait()
 	return err
 }
 
 func worker(files <-chan string, indexName string, wg *sync.WaitGroup) {
 	defer wg.Done()
+	client := &http.Client{} // Reutilizar el cliente HTTP para eficiencia
+
 	for path := range files {
 		content, err := os.ReadFile(path)
-		log.Printf("Procesando archivo: %s\n", path)
 		if err != nil {
 			log.Printf("Error leyendo archivo %s: %v\n", path, err)
 			continue
@@ -106,14 +109,14 @@ func worker(files <-chan string, indexName string, wg *sync.WaitGroup) {
 
 		email := parseEmail(string(content))
 		if email.MessageID == "" {
-			log.Printf("Saltando archivo por falta de Message-ID: %s\n", path)
+			log.Printf("Saltando archivo sin Message-ID: %s\n", path)
 			continue
 		}
 
-		email.Folder = filepath.Dir(path)
+		email.Folder = filepath.Join(filepath.Dir(path), filepath.Base(path))
 		email.Body = cleanBody(email.Body)
 
-		err = indexDocument(indexName, email)
+		err = indexDocument(indexName, email, client)
 		if err != nil {
 			log.Printf("Error indexando documento (%s): %v\n", path, err)
 		}
@@ -123,10 +126,13 @@ func worker(files <-chan string, indexName string, wg *sync.WaitGroup) {
 func parseEmail(content string) Email {
 	lines := strings.Split(content, "\n")
 	email := Email{}
+	var sb strings.Builder
 	readingBody := false
+
 	for _, line := range lines {
 		if readingBody {
-			email.Body += line + "\n"
+			sb.WriteString(line)
+			sb.WriteString("\n")
 		} else if line == "" {
 			readingBody = true
 		} else if strings.HasPrefix(line, "Message-ID:") {
@@ -141,6 +147,8 @@ func parseEmail(content string) Email {
 			email.Subject = strings.TrimSpace(strings.TrimPrefix(line, "Subject:"))
 		}
 	}
+
+	email.Body = sb.String()
 	return email
 }
 
@@ -148,18 +156,18 @@ func cleanBody(body string) string {
 	return strings.TrimSpace(strings.ReplaceAll(body, "\n", " "))
 }
 
-func indexDocument(indexName string, email Email) error {
-	zincURL := "http://localhost:4080/api/" + indexName + "/_doc"
+func indexDocument(indexName string, email Email, client *http.Client) error {
+	zincURL := fmt.Sprintf("http://localhost:4080/api/%s/_doc", indexName)
 	jsonData, err := json.Marshal(email)
 	if err != nil {
 		return fmt.Errorf("error al serializar email: %w", err)
 	}
 
-	client := &http.Client{} // Cliente HTTP reutilizable
 	req, err := http.NewRequest("POST", zincURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return fmt.Errorf("error creando solicitud HTTP: %w", err)
 	}
+
 	req.Header.Set("Content-Type", "application/json")
 	req.SetBasicAuth("admin", "admin123")
 
@@ -174,7 +182,6 @@ func indexDocument(indexName string, email Email) error {
 		return fmt.Errorf("error al indexar documento: %s", body)
 	}
 
-	log.Printf("Documento indexado: %s\n", email.MessageID)
-	fmt.Println("Documento tiene ruta: ", email.Folder)
+	log.Printf("Documento indexado con ruta %s\n", email.Folder)
 	return nil
 }
