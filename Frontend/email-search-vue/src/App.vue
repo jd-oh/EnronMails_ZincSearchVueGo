@@ -6,9 +6,7 @@
     <main>
       <router-view /> 
     </main>
-    <footer>
-      <p>Juan David Osorio</p>
-    </footer>
+
   </div>
 </template>
 
