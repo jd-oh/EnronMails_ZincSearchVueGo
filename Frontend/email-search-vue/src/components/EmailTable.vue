@@ -26,8 +26,8 @@
       :totalPages="emailStore.totalPages" 
       :totalEmails="emailStore.totalEmails"
       :pageSize="emailStore.pageSize"
-      @prev="prevPage"
-      @next="nextPage"
+      @prev="emailStore.prevPage"
+      @next="emailStore.nextPage"
     />
     
     <!-- Modal de detalles de email -->
@@ -49,6 +49,8 @@ import { useEmailStore } from '../stores/emailStore';
 
 const emailStore = useEmailStore();
 
+const isModalVisible = ref(false);
+
 const selectEmail = (email) => {
   emailStore.selectedEmail = email;
   isModalVisible.value = true;
@@ -56,20 +58,6 @@ const selectEmail = (email) => {
 
 const closeModal = () => {
   isModalVisible.value = false;
-};
-
-const prevPage = () => {
-  if (emailStore.page > 0) {
-    emailStore.page--;
-    emailStore.fetchEmails();
-  }
-};
-
-const nextPage = () => {
-  if ((emailStore.page + 1) * emailStore.pageSize < emailStore.totalEmails) {
-    emailStore.page++;
-    emailStore.fetchEmails();
-  }
 };
 
 onMounted(() => emailStore.fetchEmails());
