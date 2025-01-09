@@ -39,20 +39,40 @@ go mod init zincsearch_vue_go
 go get github.com/go-chi/chi/v5
 ```
 
-### 4. Configure ZincSearch
+### 4. Install ZincSearch
+https://github.com/zincsearch/zincsearch/releases
 
+Choose the version of your operating system
+
+Extract and move the binary to /usr/local/bin
+```bash
+sudo mv zincsearch /usr/local/bin/
+```
+### 5. Configure ZincSearch
+Set these three environment variables for authentication and index folder configuration
+
+```bash
+export ZINC_DATA_PATH=/home/juandavid/ZincSearch_Vue_Go/Backend/Indexer
+export ZINC_FIRST_ADMIN_USER="admin"
+export ZINC_FIRST_ADMIN_PASSWORD="admin123"
+```
+
+Refer to the [ZincSearch documentation](https://docs.zincsearch.com/) for installation instructions.
+
+### 6. Set up your email dataset
+
+Place the email dataset (e.g., the Enron dataset) in the project directory. Updates the `folderPath` variable in `Indexer.go` to point to the location of the previously extracted dataset.
+
+### 7. Run ZincSearch
+```bash
+zincsearch --cors.allow_origins="*"
+```
 Ensure a ZincSearch instance is running locally at `http://localhost:4080`. The default credentials are:
 
 - **Username**: `admin`
 - **Password**: `admin123`
 
-Refer to the [ZincSearch documentation](https://docs.zincsearch.com/) for installation instructions.
-
-### 5. Set up your email dataset
-
-Place the email dataset (e.g., the Enron dataset) in the project directory. Updates the `folderPath` variable in `Indexer.go` to point to the location of the previously extracted dataset.
-
-### 6. Run the Indexer
+### 8. Run the Indexer
 
 ```bash
 go run Indexer.go
@@ -60,7 +80,7 @@ go run Indexer.go
 
 This will process and index the emails into ZincSearch.
 
-### 7. Run the API Server
+### 9. Run the API Server
 
 ```bash
 go run main.go
