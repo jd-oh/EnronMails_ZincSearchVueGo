@@ -152,3 +152,14 @@ npm run dev
 
 Open your browser and navigate to: http://localhost:5173/
 
+
+## Try the Deployed Application
+
+You can try the application directly without setting it up locally. It's deployed at the following address:
+
+**[http://3.149.23.100/](http://3.149.23.100/)**
+
+Experience the full functionality of the platform and provide feedback!
+
+
+
