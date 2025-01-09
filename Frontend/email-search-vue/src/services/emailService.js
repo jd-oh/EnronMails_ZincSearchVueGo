@@ -24,6 +24,7 @@ api.interceptors.response.use(
  * @returns {Promise<Object>} - Resultado de la búsqueda.
  */
 export const fetchEmails = async ({ term, field, from, size }) => {
+  console.log('Parameters sent to API:', { term, field, from, size }); // Verifica los valores
   const response = await api.post('/search', {
     term: term || '*',
     field,

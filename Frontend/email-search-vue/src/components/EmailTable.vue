@@ -3,35 +3,36 @@
     <h1 class="mb-4 text-3xl font-extrabold text-gray-900 dark:text-white md:text-5xl lg:text-6xl text-center">
       <span class="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">Enron Mails</span> List
     </h1>
-   <!-- Barra de búsqueda -->
+
+    <!-- Barra de búsqueda -->
     <SearchBar 
-      v-model="searchQuery" 
-      :field="selectedField"
-      @update:field="field => selectedField = field"
-      @search="fetchEmails" 
+      v-model="emailStore.searchQuery" 
+      :field="emailStore.selectedField" 
+      @update:field="field => emailStore.selectedField = field"
+      @search="emailStore.fetchEmails" 
       class="mb-6"
     />
 
     <!-- Lista de correos -->
     <EmailList 
-      :emails="emails" 
-      :selectedEmail="selectedEmail"
+      :emails="emailStore.emails" 
+      :selectedEmail="emailStore.selectedEmail"
       @select="selectEmail"
     />
 
     <!-- Paginación -->
     <Pagination 
-      :page="page" 
-      :totalPages="totalPages" 
-      :totalEmails="totalEmails"
-      :pageSize="pageSize"
+      :page="emailStore.page" 
+      :totalPages="emailStore.totalPages" 
+      :totalEmails="emailStore.totalEmails"
+      :pageSize="emailStore.pageSize"
       @prev="prevPage"
       @next="nextPage"
     />
     
     <!-- Modal de detalles de email -->
     <EmailDetail 
-      :email="selectedEmail"
+      :email="emailStore.selectedEmail"
       :isVisible="isModalVisible"
       @close="closeModal"
     />
@@ -40,46 +41,16 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import emailService from '../services/emailService';
 import SearchBar from './SearchBar.vue';
-import EmailList from './EmailList.vue';  
-import EmailDetail from './EmailDetail.vue'; 
-import Pagination from './Pagination.vue'; 
+import EmailList from './EmailList.vue';
+import EmailDetail from './EmailDetail.vue';
+import Pagination from './Pagination.vue';
+import { useEmailStore } from '../stores/emailStore';
 
-const emails = ref([]);
-const selectedEmail = ref(null);
-const searchQuery = ref('');
-const selectedField = ref('body');
-const page = ref(0);  
-const pageSize = 5;  
-const totalEmails = ref(0);
-const totalPages = ref(1);
-const isModalVisible = ref(false);
-
-const fetchEmails = async () => {
-  try {
-    const data = await emailService.fetchEmails({
-      term: searchQuery.value,
-      field: selectedField.value,
-      from: page.value * pageSize,
-      size: pageSize,
-    });
-
-    emails.value = data.hits.hits.map(hit => hit._source);
-    totalEmails.value = data.hits.total ? data.hits.total.value : 0;
-    totalPages.value = Math.ceil(totalEmails.value / pageSize);
-
-    if (emails.value.length === 0 && page.value !== 0) {
-      page.value = 0;
-      fetchEmails();
-    }
-  } catch (error) {
-    console.error('Error fetching emails:', error);
-  }
-};
+const emailStore = useEmailStore();
 
 const selectEmail = (email) => {
-  selectedEmail.value = email;
+  emailStore.selectedEmail = email;
   isModalVisible.value = true;
 };
 
@@ -88,18 +59,18 @@ const closeModal = () => {
 };
 
 const prevPage = () => {
-  if (page.value > 0) {
-    page.value--;
-    fetchEmails();
+  if (emailStore.page > 0) {
+    emailStore.page--;
+    emailStore.fetchEmails();
   }
 };
 
 const nextPage = () => {
-  if ((page.value + 1) * pageSize < totalEmails.value) {
-    page.value++;
-    fetchEmails();
+  if ((emailStore.page + 1) * emailStore.pageSize < emailStore.totalEmails) {
+    emailStore.page++;
+    emailStore.fetchEmails();
   }
 };
 
-onMounted(() => fetchEmails());
+onMounted(() => emailStore.fetchEmails());
 </script>
