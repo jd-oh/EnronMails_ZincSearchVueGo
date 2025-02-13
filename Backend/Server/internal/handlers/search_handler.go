@@ -1,5 +1,8 @@
 package handlers
 
+//Se encarga de gestionar las solicitudes HTTP de búsqueda. Decodifica el JSON entrante en una 
+//estructura de solicitud, valida y establece un campo predeterminado (por ejemplo, "body" en caso de 
+//ausencia), y luego invoca el servicio de búsqueda para obtener los resultados.
 import (
     "encoding/json"
     "net/http"

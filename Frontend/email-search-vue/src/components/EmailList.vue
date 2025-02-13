@@ -1,5 +1,5 @@
 <template>
-  <div class="relative overflow-x-auto">
+  <div class="relative overflow-x-auto mx-4">
     <table 
       v-if="emails.length > 0" 
       class="w-full text-sm text-left text-gray-500 dark:text-gray-400"

@@ -1,5 +1,6 @@
 package models
 
+//Define la estructura de la solicitud de búsqueda y la consulta de búsqueda de ZincSearch.
 type SearchRequest struct {
     Term  string `json:"term"`
     From  int    `json:"from"`

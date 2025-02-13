@@ -1,5 +1,10 @@
 package services
 
+
+//Contiene la lógica de negocio para ejecutar búsquedas. A partir de la solicitud 
+//(por ejemplo, models.SearchRequest), construye la consulta en JSON, realiza la solicitud HTTP 
+//a ZincSearch, maneja la respuesta (incluyendo errores y lectura del cuerpo) y retorna 
+//los resultados al manejador.
 import (
     "bytes"
     "encoding/json"
@@ -40,7 +45,9 @@ func (s *SearchService) Search(req models.SearchRequest) ([]byte, error) {
         Source:     []string{"subject", "from", "to", "date", "body", "message_id", "folder"},
     }
 
+    // Convert query to JSON
     jsonQuery, err := json.Marshal(query)
+
     if err != nil {
         return nil, fmt.Errorf("error marshaling query: %w", err)
     }
@@ -48,7 +55,7 @@ func (s *SearchService) Search(req models.SearchRequest) ([]byte, error) {
     // Log outgoing request
     log.Printf("Sending request to ZincSearch: %s", string(jsonQuery))
 
-    request, err := http.NewRequest("POST", s.config.ZincSearchURL+"/api/emails/_search", bytes.NewBuffer(jsonQuery))
+    request, err := http.NewRequest("POST", s.config.ZincSearchURL+s.config.EndpointIndex+"/_search", bytes.NewBuffer(jsonQuery))
     if err != nil {
         return nil, fmt.Errorf("error creating request: %w", err)
     }

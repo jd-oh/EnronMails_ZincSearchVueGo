@@ -30,7 +30,7 @@ type Email struct {
 
 func main() {
 	// Configuración del archivo de log para registrar el progreso del procesamiento.
-	logFile, err := os.OpenFile("Logs/process_bulk.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	logFile, err := os.OpenFile("Logs/process_bulk_2000.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Printf("Error creando archivo de log: %v\n", err)
 		return
@@ -43,7 +43,7 @@ func main() {
 	log.Println("Iniciando procesamiento con bulk index")
 
 	// Iniciar perfilado de CPU para analizar el rendimiento de la aplicación.
-	f, err := os.Create("Profiles/cpu_profile_bulk.prof")
+	f, err := os.Create("Profiles/cpu_profile_bulk_2000.prof")
 	if err != nil {
 		log.Fatalf("Error creando archivo de perfil: %v", err)
 	}
@@ -56,7 +56,7 @@ func main() {
 	// Configuración para el procesamiento
 	folderPath := "enron_mail_20110402" // Cambia esto a la ruta de tu carpeta
 	indexName := "emails"               // El nombre del índice en ZincSearch
-	batchSize := 1000                   // Tamaño del lote de documentos a enviar por cada solicitud
+	batchSize := 2000                   // Tamaño del lote de documentos a enviar por cada solicitud
 	numWorkers := 16                    // Número de workers concurrentes para procesar archivos
 
 	start := time.Now()
@@ -160,7 +160,7 @@ func sendBulk(indexName string, emails []Email, client *http.Client) error {
 	// Construir el cuerpo del request en formato bulk
 	for _, email := range emails {
 		action := map[string]interface{}{
-			"index": map[string]string{}, // Acción de indexación
+			"index": map[string]string{}, // Acción de indexación (formato esperado por la API _bulk)
 		}
 		actionJSON, _ := json.Marshal(action)
 		emailJSON, _ := json.Marshal(email)

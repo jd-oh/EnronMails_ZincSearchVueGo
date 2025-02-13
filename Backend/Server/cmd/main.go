@@ -22,6 +22,10 @@ func main() {
     searchService := services.NewSearchService(config)
     searchHandler := handlers.NewSearchHandler(searchService)
 
+    // Inicializa el servicio y handler para folders.
+    folderService := services.NewFolderService()
+    foldersHandler := handlers.NewFoldersHandler(folderService)
+    
     r := chi.NewRouter()
     r.Use(middleware.Logger)
     r.Use(middleware.Recoverer)
@@ -30,6 +34,8 @@ func main() {
     r.Route("/api", func(r chi.Router) {
         r.Post("/search", searchHandler.Handle)
     })
+
+    r.Get("/api/folders", foldersHandler.Handle)
 
     log.Printf("Server listening on port %s", config.ServerPort)
     log.Fatal(http.ListenAndServe(":"+config.ServerPort, r))

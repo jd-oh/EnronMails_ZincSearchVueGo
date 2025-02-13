@@ -1,5 +1,8 @@
 package middleware
 
+//Implementa funcionalidades de middleware, como EnableCors, que añade los encabezados 
+//necesarios para permitir solicitudes CORS. Esto es útil para que clientes alojados en 
+//otros dominios puedan acceder a la API sin problemas.
 import "net/http"
 
 func EnableCors(next http.Handler) http.Handler {
