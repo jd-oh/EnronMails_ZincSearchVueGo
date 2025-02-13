@@ -1,4 +1,3 @@
-<!-- Frontend/email-search-vue/src/components/SearchBar.vue -->
 <template>
   <div class="search-container flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
     <div class="relative w-full sm:w-1/3">

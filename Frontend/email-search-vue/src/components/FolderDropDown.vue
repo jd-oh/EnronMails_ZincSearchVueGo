@@ -10,13 +10,26 @@
       >
         {{ selectedMainFolder || 'Selecciona una carpeta' }}
         <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path v-if="dropdownOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-          <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          <path
+            v-if="dropdownOpen"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 15l7-7 7 7"
+          />
+          <path
+            v-else
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
       <div
         v-if="dropdownOpen"
-        class="origin-top-right absolute z-10 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+        class="origin-top-right absolute z-10 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 overflow-y-auto"
+        style="max-height: 10rem;"
       >
         <div class="py-1">
           <button
@@ -44,13 +57,26 @@
         >
           {{ selectedSubFolder || 'Selecciona una subcarpeta' }}
           <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path v-if="dropdownSubOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-            <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            <path
+              v-if="dropdownSubOpen"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 15l7-7 7 7"
+            />
+            <path
+              v-else
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
           </svg>
         </button>
         <div
           v-if="dropdownSubOpen"
-          class="origin-top-right absolute z-10 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+          class="origin-top-right absolute z-10 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 overflow-y-auto"
+          style="max-height: 10rem;"
         >
           <div class="py-1">
             <button
@@ -105,10 +131,10 @@ const selectFolder = (main, sub) => {
 
 onMounted(async () => {
   try {
-    folders.value = await fetchFolders();
+    folders.value = await fetchFolders()
   } catch (error) {
     console.error("Error al cargar las carpetas:", error)
   }
 })
 </script>
-
+  

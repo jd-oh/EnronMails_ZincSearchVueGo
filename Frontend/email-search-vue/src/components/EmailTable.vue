@@ -1,4 +1,3 @@
-<!-- language: vue -->
 <template>
   <div class="fixed inset-0 w-full h-screen p-8 overflow-y-auto bg-gray-100 dark:bg-gray-900">
     <h1 class="mb-4 text-3xl font-extrabold text-gray-900 dark:text-white md:text-5xl lg:text-6xl text-center">
